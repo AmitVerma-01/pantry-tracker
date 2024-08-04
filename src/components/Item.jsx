@@ -69,7 +69,7 @@ const Item = () => {
       setIsRecipeReady(false)
     }
     setIsRecipeReady(false)
-    console.log("Checked items for recipe:", checkedItems);
+    // console.log("Checked items for recipe:", checkedItems);
     // Example: await fetchRecipeFromModel(checkedItems);
   };
 

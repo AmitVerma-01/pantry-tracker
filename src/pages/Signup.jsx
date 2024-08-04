@@ -26,7 +26,7 @@ const Signup = () => {
     try {
       if(fullName && email && password ){
         const user = await firebase.signupUserWithEmailPassword(email,password)
-        console.log("success ",user);
+        // console.log("success ",user);
       }else{
         alert("Please provide your credentials")
       }
