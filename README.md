@@ -1,4 +1,5 @@
-# React + Vite
+# pantry tracker and recipe generator
+[Demo](https://pantryapp-amitverma-01s-projects.vercel.app/)
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
