@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firebase Test</title>
+</head>
+<body>
+    <h1>Firebase Connection Test</h1>
+    <div id="status">Testing...</div>
+    <div id="details"></div>
+
+    <script type="module">
+        // Test Firebase configuration
+        const config = {
+            apiKey: "AIzaSyAA-aOh2QFgLUDj6XTG1727so-1naZMCKk",
+            authDomain: "pantry-tracker-71faf.firebaseapp.com",
+            projectId: "pantry-tracker-71faf",
+            storageBucket: "pantry-tracker-71faf.appspot.com",
+            messagingSenderId: "494505365927",
+            appId: "1:494505365927:web:fcf2ad6a7a76216eb82682"
+        };
+
+        console.log("Firebase Config:", config);
+        document.getElementById('details').innerHTML = `
+            <h3>Configuration:</h3>
+            <pre>${JSON.stringify(config, null, 2)}</pre>
+            <p>Check browser console for more details</p>
+        `;
+        
+        import('https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js').then(({ initializeApp }) => {
+            import('https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js').then(({ getFirestore, collection, getDocs }) => {
+                try {
+                    const app = initializeApp(config);
+                    const db = getFirestore(app);
+                    document.getElementById('status').innerHTML = '✅ Firebase initialized successfully!';
+                    console.log('Firebase initialized:', app);
+                    console.log('Firestore instance:', db);
+                } catch (error) {
+                    document.getElementById('status').innerHTML = '❌ Firebase initialization failed!';
+                    document.getElementById('details').innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
+                    console.error('Firebase error:', error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
