@@ -37,18 +37,9 @@ A React-based web application for managing pantry inventory and generating AI-po
    npm install
    ```
 
-3. Create a `.env` file in the root directory with your Firebase and Gemini API credentials:
-   ```
-   VITE_FIREBASE_API_KEY=your_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-   VITE_FIREBASE_DATABASE_URL=your_database_url
-   VITE_GEMINI_API_KEY=your_gemini_key
-   ```
+3. Create a `.env` file from `.env.example`:
+   - `VITE_*` variables are for the browser (Firebase client config).
+   - `GEMINI_API_KEY` and `FIREBASE_API_KEY` are **server-only** — never use the `VITE_` prefix for Gemini.
 
 4. Deploy Firebase security rules:
    ```bash
@@ -73,6 +64,12 @@ The application uses comprehensive Firestore security rules to protect user data
 - Authentication is required for all database operations
 
 See [firestore.rules](./firestore.rules) for the complete security rules implementation.
+
+## Environment & Security
+
+- **Firebase `VITE_*` keys** are public by design in web apps; protect data with [Firestore rules](./firestore.rules).
+- **Gemini API key** lives in `GEMINI_API_KEY` (server-only). Recipe generation calls `/api/generate-recipe`, which verifies the user's Firebase login before calling Gemini.
+- On **Vercel**, set `GEMINI_API_KEY` and `FIREBASE_API_KEY` in the project Environment Variables dashboard (not in git).
 
 ## Development
 
