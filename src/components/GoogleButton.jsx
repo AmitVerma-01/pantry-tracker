@@ -25,7 +25,7 @@ const GoogleButton = ({ label = "Continue with Google" }) => {
   return (
     <button
       type="button"
-      className="p-3 bg-white border-2 border-c3 w-full rounded-lg shadow-md hover:bg-c1 hover:shadow-lg font-semibold flex justify-center gap-x-3 items-center transition-smooth disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+      className="btn-secondary w-full !py-3 gap-3"
       onClick={handleGoogleSignIn}
       disabled={isLoading}
       aria-label={label}
@@ -34,8 +34,8 @@ const GoogleButton = ({ label = "Continue with Google" }) => {
         <LoadingSpinner variant="button" size="sm" text="Signing in..." />
       ) : (
         <>
+          <img src="google.png" alt="" className="w-5 h-5" />
           {label}
-          <img src="google.png" alt="Google logo" className="w-5 h-5" />
         </>
       )}
     </button>

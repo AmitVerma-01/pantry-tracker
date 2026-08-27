@@ -16,8 +16,8 @@ function Items() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gradient-to-br from-c1 to-c2">
-        <LoadingSpinner variant="inline" size="lg" text="Loading..." />
+      <div className="page-bg flex min-h-[calc(100vh-64px)] items-center justify-center">
+        <LoadingSpinner variant="inline" size="lg" text="Loading your pantry..." />
       </div>
     )
   }

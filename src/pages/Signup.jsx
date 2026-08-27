@@ -106,9 +106,13 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] w-full py-6 md:py-10 flex justify-center items-center bg-gradient-to-br from-c1 to-c2 px-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-6 md:p-8 animate-scale-in">
-        <h1 className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800">Sign Up</h1>
+    <div className="page-bg w-full py-8 md:py-12 flex justify-center items-center px-4">
+      <div className="w-full max-w-md card-elevated p-6 md:p-8 animate-scale-in">
+        <div className="text-center mb-8">
+          <span className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-c4 to-c5 text-2xl shadow-soft mb-4">✨</span>
+          <h1 className="text-3xl font-extrabold text-ink tracking-tight">Create account</h1>
+          <p className="text-ink-muted mt-1.5 text-sm">Start tracking your pantry today</p>
+        </div>
         <form onSubmit={handleSignUp} className="flex flex-col gap-y-4">
           <div className="transition-smooth">
             <Input
@@ -152,7 +156,7 @@ const Signup = () => {
 
           <button
             type="submit"
-            className="p-3 bg-c4 w-full rounded-lg mt-4 shadow-lg hover:bg-opacity-90 hover:shadow-xl text-lg md:text-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-smooth hover-lift active:scale-95 text-white"
+            className="btn-primary w-full !py-3 text-base mt-2"
             disabled={isSubmitting || authLoading}
           >
             {isSubmitting ? (
@@ -165,15 +169,15 @@ const Signup = () => {
 
         <div className="my-4 flex items-center gap-3">
           <div className="flex-1 h-px bg-c3" />
-          <span className="text-gray-500 text-sm">or</span>
+          <span className="text-ink-faint text-sm">or</span>
           <div className="flex-1 h-px bg-c3" />
         </div>
 
         <GoogleButton label="Sign up with Google" />
 
-        <p className="text-gray-600 text-center my-4 md:my-6 text-sm md:text-base">
+        <p className="text-ink-muted text-center mt-6 text-sm">
           Already have an account?{' '}
-          <NavLink to="/signin" className="text-c4 font-semibold hover:underline transition-all">
+          <NavLink to="/signin" className="link-accent">
             Sign In
           </NavLink>
         </p>

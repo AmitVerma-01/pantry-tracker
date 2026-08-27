@@ -2,18 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom animations */
+body {
+  @apply text-ink bg-surface-muted;
+}
+
 @keyframes slide-in-right {
   from {
     transform: translateX(100%);
@@ -29,24 +31,120 @@ html {
   animation: slide-in-right 0.3s ease-out;
 }
 
-/* Focus styles for accessibility */
 @layer base {
   *:focus-visible {
-    @apply outline-none ring-2 ring-c4 ring-offset-2;
+    @apply outline-none ring-2 ring-c4 ring-offset-2 ring-offset-white;
   }
 }
 
-/* Custom utility classes */
+@layer components {
+  .page-bg {
+    @apply min-h-[calc(100vh-64px)] bg-mesh;
+  }
+
+  .glass-nav {
+    @apply bg-white/95 backdrop-blur-md border-b border-c3/50 shadow-nav;
+  }
+
+  .card {
+    @apply bg-surface rounded-2xl border border-c3/70 shadow-soft;
+  }
+
+  .card-elevated {
+    @apply bg-surface rounded-2xl border border-c3/60 shadow-card;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           bg-c4 text-white font-semibold rounded-xl
+           shadow-soft hover:bg-c5 hover:shadow-card
+           transition-all duration-200 active:scale-[0.98]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-c4;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           bg-white text-ink font-semibold rounded-xl
+           border-2 border-c3 text-ink
+           hover:bg-c1 hover:border-c4
+           transition-all duration-200 active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5
+           text-ink-muted font-semibold rounded-lg
+           hover:bg-c2/70 hover:text-ink
+           transition-all duration-200 active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2
+           bg-red-600 text-white font-semibold rounded-xl
+           hover:bg-red-700 shadow-soft
+           transition-all duration-200 active:scale-[0.98];
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-c3 bg-white
+           text-ink placeholder:text-ink-faint
+           focus:border-c4 focus:ring-2 focus:ring-c4/20 focus:shadow-none
+           transition-all duration-200 hover:border-c4/70;
+  }
+
+  .section-title {
+    @apply text-2xl md:text-3xl font-bold text-ink tracking-tight;
+  }
+
+  .section-subtitle {
+    @apply text-ink-muted text-sm md:text-base;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+           text-xs font-semibold uppercase tracking-wide
+           bg-c2 text-c5 border border-c3;
+  }
+
+  .tab-pill {
+    @apply px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200;
+  }
+
+  .tab-pill-active {
+    @apply bg-c4 text-white shadow-soft;
+  }
+
+  .tab-pill-inactive {
+    @apply bg-white text-ink-muted border border-c3
+           hover:bg-c1 hover:text-ink hover:border-c4/50;
+  }
+
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-16 px-6 text-center;
+  }
+
+  .empty-state-icon {
+    @apply w-16 h-16 mb-4 text-c5;
+  }
+
+  .link-accent {
+    @apply text-c5 font-semibold hover:text-c6 hover:underline;
+  }
+}
+
 @layer utilities {
   .transition-smooth {
     @apply transition-all duration-300 ease-in-out;
   }
-  
+
   .hover-lift {
-    @apply transition-transform duration-200 hover:scale-105;
+    @apply transition-transform duration-200 hover:-translate-y-0.5;
   }
-  
+
   .hover-shadow {
-    @apply transition-shadow duration-200 hover:shadow-lg;
+    @apply transition-shadow duration-200 hover:shadow-card;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-c5 to-c4 bg-clip-text text-transparent;
   }
 }

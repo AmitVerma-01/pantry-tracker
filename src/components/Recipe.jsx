@@ -43,15 +43,15 @@ const Recipe = ({ recipe, isCached, onClose, onRetry, loading, error }) => {
     >
       <div
         ref={dialogRef}
-        className={`relative w-full max-w-4xl max-h-[90vh] mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 ${
+        className={`relative w-full max-w-4xl max-h-[90vh] mx-4 bg-white rounded-3xl shadow-float overflow-hidden transform transition-all duration-300 ${
           isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
         }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="recipe-dialog-title"
       >
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-c3 to-c4 text-white px-6 py-4 flex items-center justify-between shadow-lg">
-          <h2 id="recipe-dialog-title" className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-c5 to-c4 text-white px-6 py-4 flex items-center justify-between">
+          <h2 id="recipe-dialog-title" className="text-xl md:text-2xl font-bold flex items-center gap-2">
             <span className="text-3xl" aria-hidden="true">🍳</span>
             Your Recipe
             {isCached && (
@@ -76,21 +76,21 @@ const Recipe = ({ recipe, isCached, onClose, onRetry, loading, error }) => {
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <svg className="animate-spin h-16 w-16 text-c4" viewBox="0 0 24 24">
+              <svg className="animate-spin h-16 w-16 text-c5" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
-              <p className="mt-4 text-lg font-medium text-gray-700">Generating your recipe...</p>
-              <p className="mt-2 text-sm text-gray-500">This may take a few moments</p>
+              <p className="mt-4 text-lg font-medium text-ink">Generating your recipe...</p>
+              <p className="mt-2 text-sm text-ink-muted">This may take a few moments</p>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <p className="text-lg font-medium text-gray-900 mb-2">Failed to generate recipe</p>
-              <p className="text-sm text-gray-600 mb-6 text-center max-w-md">{error}</p>
+              <p className="text-lg font-medium text-ink mb-2">Failed to generate recipe</p>
+              <p className="text-sm text-ink-muted mb-6 text-center max-w-md">{error}</p>
               {onRetry && (
                 <button
                   onClick={onRetry}
-                  className="px-6 py-3 bg-c4 text-white rounded-lg hover:bg-c3 hover:shadow-lg transition-smooth flex items-center gap-2 font-semibold active:scale-95"
+                  className="btn-primary !py-3"
                 >
                   Try Again
                 </button>
@@ -103,7 +103,7 @@ const Recipe = ({ recipe, isCached, onClose, onRetry, loading, error }) => {
             />
           ) : (
             <div className="flex items-center justify-center py-12">
-              <p className="text-gray-500">No recipe available.</p>
+              <p className="text-ink-muted">No recipe available.</p>
             </div>
           )}
         </div>

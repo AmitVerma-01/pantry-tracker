@@ -37,7 +37,7 @@ const LoadingSpinner = ({ variant = 'inline', size = 'md', text = '' }) => {
         <div className="text-center">
           {spinner}
           {text && (
-            <p className="mt-4 text-gray-700 font-medium">{text}</p>
+            <p className="mt-4 text-ink font-medium">{text}</p>
           )}
         </div>
       </div>
@@ -59,7 +59,7 @@ const LoadingSpinner = ({ variant = 'inline', size = 'md', text = '' }) => {
       <div className="text-center">
         {spinner}
         {text && (
-          <p className="mt-2 text-gray-600 text-sm">{text}</p>
+          <p className="mt-2 text-ink-muted text-sm">{text}</p>
         )}
       </div>
     </div>

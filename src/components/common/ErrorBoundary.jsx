@@ -43,28 +43,28 @@ class ErrorBoundary extends Component {
                 />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-3">
+            <h1 className="text-3xl font-bold text-ink mb-3">
               Oops! Something went wrong
             </h1>
-            <p className="text-gray-600 mb-8 text-lg">
+            <p className="text-ink-muted mb-8 text-lg">
               We encountered an unexpected error. Please try reloading the page.
             </p>
             <button
               onClick={this.handleReload}
-              className="w-full bg-c4 hover:bg-c3 text-white font-bold py-3 px-4 rounded-lg transition-smooth hover:shadow-xl active:scale-95"
+              className="btn-primary w-full !py-3"
             >
               Reload Page
             </button>
             {this.state.error && (
               <details className="mt-6 text-left">
-                <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-c4 transition-colors">
+                <summary className="cursor-pointer text-sm font-medium text-ink-muted hover:text-c5 transition-colors">
                   Error Details (Development Only)
                 </summary>
                 <div className="mt-2 p-4 bg-gray-100 rounded-lg text-xs overflow-auto max-h-64">
                   <p className="font-semibold text-red-600 mb-2">
                     {this.state.error.toString()}
                   </p>
-                  <pre className="text-gray-700 whitespace-pre-wrap">
+                  <pre className="text-ink-muted whitespace-pre-wrap">
                     {this.state.errorInfo?.componentStack}
                   </pre>
                 </div>

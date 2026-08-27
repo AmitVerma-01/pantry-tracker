@@ -12,15 +12,15 @@ const AddItem = ({ onAddItem, loading: externalLoading }) => {
   const toast = useToast();
 
   const validateForm = () => {
-    const itemNameError = validateItemName(itemName);
-    const quantityError = validateQuantity(quantity);
+    const itemNameResult = validateItemName(itemName);
+    const quantityResult = validateQuantity(quantity);
 
     setErrors({
-      itemName: itemNameError,
-      quantity: quantityError
+      itemName: itemNameResult.error || "",
+      quantity: quantityResult.error || ""
     });
 
-    return !itemNameError && !quantityError;
+    return itemNameResult.isValid && quantityResult.isValid;
   };
 
   const handleItemNameChange = (e) => {
@@ -31,7 +31,7 @@ const AddItem = ({ onAddItem, loading: externalLoading }) => {
     if (errors.itemName) {
       setErrors(prev => ({
         ...prev,
-        itemName: validateItemName(value)
+        itemName: validateItemName(value).error || ""
       }));
     }
   };
@@ -44,7 +44,7 @@ const AddItem = ({ onAddItem, loading: externalLoading }) => {
     if (errors.quantity) {
       setErrors(prev => ({
         ...prev,
-        quantity: validateQuantity(value)
+        quantity: validateQuantity(value).error || ""
       }));
     }
   };
@@ -77,11 +77,17 @@ const AddItem = ({ onAddItem, loading: externalLoading }) => {
   const isLoading = loading || externalLoading;
 
   return (
-    <div className="py-3 w-full">
-      <h2 className="text-2xl md:text-3xl font-semibold md:font-bold my-2 text-gray-800">Add New Item</h2>
+    <div className="card p-5 md:p-6 mb-5 animate-slide-up">
+      <div className="flex items-center gap-3 mb-4">
+        <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-c2 text-lg">➕</span>
+        <div>
+          <h2 className="section-title !text-xl">Add item</h2>
+          <p className="section-subtitle">Quickly stock your pantry</p>
+        </div>
+      </div>
       <div className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="w-full sm:w-3/5">
+          <div className="w-full sm:flex-[3]">
             <input
               type="text"
               id="itemName"
@@ -89,21 +95,19 @@ const AddItem = ({ onAddItem, loading: externalLoading }) => {
               onChange={handleItemNameChange}
               onKeyPress={handleKeyPress}
               disabled={isLoading}
-              className={`bg-white shadow-md rounded-lg p-3 w-full border-2 text-lg transition-smooth hover:shadow-lg focus:shadow-lg ${
-                errors.itemName ? 'border-red-500 focus:border-red-500' : 'border-c3 focus:border-c4'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              placeholder="Item Name..."
+              className={`input-field ${errors.itemName ? '!border-red-400' : ''} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              placeholder="e.g. Olive oil, Rice, Tomatoes..."
               aria-label="Item name"
               aria-invalid={!!errors.itemName}
               aria-describedby={errors.itemName ? "itemName-error" : undefined}
             />
             {errors.itemName && (
-              <p id="itemName-error" className="text-red-500 text-sm mt-1 animate-slide-down">
+              <p id="itemName-error" className="text-red-500 text-sm mt-1.5 animate-slide-down">
                 {errors.itemName}
               </p>
             )}
           </div>
-          <div className="w-full sm:w-2/5">
+          <div className="w-full sm:flex-[2]">
             <input
               type="number"
               id="quantity"
@@ -112,58 +116,27 @@ const AddItem = ({ onAddItem, loading: externalLoading }) => {
               onKeyPress={handleKeyPress}
               disabled={isLoading}
               min="1"
-              className={`bg-white shadow-md w-full rounded-lg p-3 border-2 text-lg transition-smooth hover:shadow-lg focus:shadow-lg ${
-                errors.quantity ? 'border-red-500 focus:border-red-500' : 'border-c3 focus:border-c4'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              placeholder="Quantity"
+              className={`input-field ${errors.quantity ? '!border-red-400' : ''} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              placeholder="Qty"
               aria-label="Quantity"
               aria-invalid={!!errors.quantity}
               aria-describedby={errors.quantity ? "quantity-error" : undefined}
             />
             {errors.quantity && (
-              <p id="quantity-error" className="text-red-500 text-sm mt-1 animate-slide-down">
+              <p id="quantity-error" className="text-red-500 text-sm mt-1.5 animate-slide-down">
                 {errors.quantity}
               </p>
             )}
           </div>
         </div>
-        <div className="w-full flex justify-end">
+        <div className="flex justify-end">
           <button
-            className={`bg-c4 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-opacity-90 hover:shadow-xl transition-smooth hover-lift active:scale-95 flex items-center gap-2 font-semibold ${
-              isLoading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className="btn-primary"
             onClick={submitItem}
             disabled={isLoading}
             aria-label="Add item"
           >
-            {isLoading ? (
-              <>
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                Adding...
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                Add Item
-              </>
-            )}
+            {isLoading ? 'Adding...' : '+ Add to pantry'}
           </button>
         </div>
       </div>

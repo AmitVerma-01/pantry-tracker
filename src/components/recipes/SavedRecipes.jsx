@@ -9,11 +9,7 @@ import Recipe from '../Recipe';
 const formatDate = (timestamp) => {
   if (!timestamp) return 'Unknown date';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  return date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
 const SavedRecipes = ({ userId }) => {
@@ -37,9 +33,7 @@ const SavedRecipes = ({ userId }) => {
       await deleteRecipe(recipeId);
       toast.success('Recipe deleted');
       setConfirmDelete(null);
-      if (viewingRecipe?.id === recipeId) {
-        setViewingRecipe(null);
-      }
+      if (viewingRecipe?.id === recipeId) setViewingRecipe(null);
     } catch (err) {
       toast.error(err.message || 'Failed to delete recipe');
     } finally {
@@ -49,64 +43,54 @@ const SavedRecipes = ({ userId }) => {
 
   if (loading && recipes.length === 0) {
     return (
-      <div className="flex justify-center py-12">
+      <div className="card-elevated flex justify-center py-16">
         <LoadingSpinner variant="inline" size="lg" text="Loading saved recipes..." />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-xl p-4 md:p-6 animate-fade-in">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Saved Recipes</h2>
-
+    <div className="animate-fade-in">
       {recipes.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">
-          No saved recipes yet. Select pantry items and generate a recipe to get started!
-        </p>
+        <div className="card-elevated empty-state">
+          <span className="text-5xl mb-4">🍳</span>
+          <p className="text-lg font-semibold text-ink">No saved recipes yet</p>
+          <p className="text-sm text-ink-muted mt-1.5 max-w-sm">
+            Select pantry items and tap &ldquo;Get Recipe&rdquo; to generate and save your first one.
+          </p>
+        </div>
       ) : (
-        <ul className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {recipes.map((recipe) => (
-            <li
-              key={recipe.id}
-              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border border-c2 rounded-lg hover:bg-c1 transition-smooth"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-800 truncate">
-                  {recipe.ingredients?.join(', ') || 'Unknown ingredients'}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Saved {formatDate(recipe.createdAt)}
-                </p>
+            <div key={recipe.id} className="card p-5 hover:shadow-card hover:-translate-y-0.5 transition-all duration-200">
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {recipe.ingredients?.slice(0, 4).map((ing) => (
+                  <span key={ing} className="badge !normal-case !tracking-normal !text-xs !py-0.5">
+                    {ing}
+                  </span>
+                ))}
+                {(recipe.ingredients?.length ?? 0) > 4 && (
+                  <span className="badge !normal-case !tracking-normal !text-xs !py-0.5">
+                    +{recipe.ingredients.length - 4} more
+                  </span>
+                )}
               </div>
-              <div className="flex gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setViewingRecipe(recipe)}
-                  className="px-4 py-2 bg-c4 text-white rounded-lg font-semibold hover:bg-c3 transition-smooth active:scale-95"
-                >
-                  View
+              <p className="text-xs text-ink-faint mb-4">Saved {formatDate(recipe.createdAt)}</p>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setViewingRecipe(recipe)} className="btn-primary flex-1 !py-2 text-sm">
+                  View recipe
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmDelete(recipe)}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-smooth active:scale-95"
-                >
+                <button type="button" onClick={() => setConfirmDelete(recipe)} className="btn-ghost !text-red-500 hover:!bg-red-50">
                   Delete
                 </button>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       {viewingRecipe && (
-        <Recipe
-          recipe={viewingRecipe.recipeHtml}
-          isCached={true}
-          onClose={() => setViewingRecipe(null)}
-          loading={false}
-          error={null}
-        />
+        <Recipe recipe={viewingRecipe.recipeHtml} isCached={true} onClose={() => setViewingRecipe(null)} loading={false} error={null} />
       )}
 
       {confirmDelete && (
