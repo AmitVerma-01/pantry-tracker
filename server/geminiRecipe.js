@@ -113,7 +113,7 @@ export const generateRecipeHtml = async (ingredients, { geminiApiKey, preferredM
     } catch (error) {
       lastError = error;
       const hasMoreModels = modelsToTry.indexOf(modelName) < modelsToTry.length - 1;
-
+ 
       if (hasMoreModels && shouldTryNextModel(error)) {
         console.warn(`[AI] ${modelName} unavailable, trying next model:`, error.message);
         continue;
