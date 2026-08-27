@@ -1,27 +1,70 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import * as firestoreService from '../services/firestore.service';
 
+const PAGE_SIZE = 50;
+const PREFS_PREFIX = 'pantry_prefs_';
+
+const loadPrefs = (userId) => {
+  if (!userId) return { sortBy: 'date', searchTerm: '' };
+  try {
+    const stored = localStorage.getItem(`${PREFS_PREFIX}${userId}`);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return {
+        sortBy: parsed.sortBy || 'date',
+        searchTerm: parsed.searchTerm || ''
+      };
+    }
+  } catch {
+    // ignore invalid storage
+  }
+  return { sortBy: 'date', searchTerm: '' };
+};
+
+const savePrefs = (userId, sortBy, searchTerm) => {
+  if (!userId) return;
+  try {
+    localStorage.setItem(`${PREFS_PREFIX}${userId}`, JSON.stringify({ sortBy, searchTerm }));
+  } catch {
+    // ignore quota errors
+  }
+};
+
 /**
- * Custom hook for managing pantry items with real-time updates, search, and sort
+ * Custom hook for managing pantry items with real-time updates, search, sort, and pagination
  * @param {string} userId - Current user's ID
+ * @param {string} userEmail - Current user's email
  * @returns {Object} Items state and methods
  */
-export const useItems = (userId) => {
+export const useItems = (userId, userEmail) => {
+  const initialPrefs = useMemo(() => loadPrefs(userId), [userId]);
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('date'); // 'date', 'name', 'quantity'
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [searchTerm, setSearchTermState] = useState(initialPrefs.searchTerm);
+  const [sortBy, setSortByState] = useState(initialPrefs.sortBy);
+  const [page, setPage] = useState(1);
 
-  // Debounce search term (300ms delay)
+  // Restore prefs when userId changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
+    const prefs = loadPrefs(userId);
+    setSearchTermState(prefs.searchTerm);
+    setSortByState(prefs.sortBy);
+    setPage(1);
+  }, [userId]);
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  const setSearchTerm = useCallback((term) => {
+    setSearchTermState(term);
+    setPage(1);
+    if (userId) savePrefs(userId, sortBy, term);
+  }, [userId, sortBy]);
+
+  const setSortBy = useCallback((value) => {
+    setSortByState(value);
+    setPage(1);
+    if (userId) savePrefs(userId, value, searchTerm);
+  }, [userId, searchTerm]);
 
   // Subscribe to real-time item updates
   useEffect(() => {
@@ -52,15 +95,13 @@ export const useItems = (userId) => {
   const filteredAndSortedItems = useMemo(() => {
     let result = [...items];
 
-    // Apply search filter
-    if (debouncedSearchTerm.trim()) {
-      const searchLower = debouncedSearchTerm.toLowerCase().trim();
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
       result = result.filter(item =>
         item.itemName?.toLowerCase().includes(searchLower)
       );
     }
 
-    // Apply sorting
     result.sort((a, b) => {
       switch (sortBy) {
         case 'name':
@@ -68,44 +109,52 @@ export const useItems = (userId) => {
         case 'quantity':
           return (b.quantity || 0) - (a.quantity || 0);
         case 'date':
-        default:
-          // Sort by createdAt descending (newest first)
+        default: {
           const aTime = a.createdAt?.toMillis?.() || 0;
           const bTime = b.createdAt?.toMillis?.() || 0;
           return bTime - aTime;
+        }
       }
     });
 
     return result;
-  }, [items, debouncedSearchTerm, sortBy]);
+  }, [items, searchTerm, sortBy]);
 
-  /**
-   * Add a new item or update existing item quantity
-   * @param {string} itemName - Name of the item
-   * @param {number} quantity - Item quantity
-   * @returns {Promise<Object>} Result object
-   */
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(filteredAndSortedItems.length / PAGE_SIZE)),
+    [filteredAndSortedItems.length]
+  );
+
+  // Clamp page when list shrinks
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
+
+  const paginatedItems = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredAndSortedItems.slice(start, start + PAGE_SIZE);
+  }, [filteredAndSortedItems, page]);
+
   const addItem = useCallback(async (itemName, quantity) => {
     if (!userId) {
       throw new Error('User must be authenticated to add items');
     }
+    if (!userEmail) {
+      throw new Error('User email is required to add items');
+    }
 
     setError(null);
     try {
-      const result = await firestoreService.addItem(userId, itemName, quantity);
+      const result = await firestoreService.addItem(userId, userEmail, itemName, quantity);
       return result;
     } catch (err) {
       setError(err.message);
       throw err;
     }
-  }, [userId]);
+  }, [userId, userEmail]);
 
-  /**
-   * Update an item's fields
-   * @param {string} itemId - Item document ID
-   * @param {Object} updates - Fields to update
-   * @returns {Promise<Object>} Result object
-   */
   const updateItem = useCallback(async (itemId, updates) => {
     setError(null);
     try {
@@ -117,11 +166,6 @@ export const useItems = (userId) => {
     }
   }, []);
 
-  /**
-   * Delete a single item
-   * @param {string} itemId - Item document ID
-   * @returns {Promise<Object>} Result object
-   */
   const deleteItem = useCallback(async (itemId) => {
     setError(null);
     try {
@@ -133,11 +177,6 @@ export const useItems = (userId) => {
     }
   }, []);
 
-  /**
-   * Delete multiple items using batch operation
-   * @param {Array<string>} itemIds - Array of item document IDs
-   * @returns {Promise<Object>} Result object
-   */
   const deleteItems = useCallback(async (itemIds) => {
     setError(null);
     try {
@@ -150,14 +189,20 @@ export const useItems = (userId) => {
   }, []);
 
   return {
-    items: filteredAndSortedItems,
+    items: paginatedItems,
     allItems: items,
+    filteredItems: filteredAndSortedItems,
     loading,
     error,
     searchTerm,
     setSearchTerm,
     sortBy,
     setSortBy,
+    page,
+    setPage,
+    totalPages,
+    pageSize: PAGE_SIZE,
+    filteredCount: filteredAndSortedItems.length,
     addItem,
     updateItem,
     deleteItem,

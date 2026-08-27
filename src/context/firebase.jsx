@@ -1,7 +1,7 @@
-import { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../config/firebase.config';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import * as authService from '../services/auth.service';
 
 const AuthContext = createContext(null);
 
@@ -18,17 +18,16 @@ export const useFirebase = () => {
 };
 
 /**
- * Simplified Firebase provider that only manages auth state
- * All business logic has been moved to services and hooks
+ * Unified auth provider — single listener, all auth methods
  */
 export const FirebaseProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Subscribe to auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser || null);
+    const unsubscribe = authService.onAuthStateChange((currentUser) => {
+      setUser(currentUser);
       setLoading(false);
     });
     return () => unsubscribe();
@@ -36,11 +35,73 @@ export const FirebaseProvider = ({ children }) => {
 
   const isLoggedIn = useMemo(() => !!user, [user]);
 
+  const signUp = useCallback(async (email, password) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await authService.signUp(email, password);
+      setLoading(false);
+      return result;
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+      throw err;
+    }
+  }, []);
+
+  const signIn = useCallback(async (email, password) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await authService.signIn(email, password);
+      setLoading(false);
+      return result;
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+      throw err;
+    }
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await authService.signInWithGoogle();
+      setLoading(false);
+      return result;
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+      throw err;
+    }
+  }, []);
+
+  const signOut = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await authService.signOut();
+      setUser(null);
+      setLoading(false);
+      return result;
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+      throw err;
+    }
+  }, []);
+
   const contextValue = useMemo(() => ({
     user,
     loading,
-    isLoggedIn
-  }), [user, loading, isLoggedIn]);
+    isLoggedIn,
+    error,
+    signUp,
+    signIn,
+    signInWithGoogle,
+    signOut
+  }), [user, loading, isLoggedIn, error, signUp, signIn, signInWithGoogle, signOut]);
 
   return (
     <AuthContext.Provider value={contextValue}>

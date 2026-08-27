@@ -1,6 +1,8 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { useToast } from "./common/Toast";
 import { validateItemName, validateQuantity } from "../utils/validation";
+import { callbackProp } from "../types/propTypes";
 
 const AddItem = ({ onAddItem, loading: externalLoading }) => {
   const [itemName, setItemName] = useState("");
@@ -167,6 +169,15 @@ const AddItem = ({ onAddItem, loading: externalLoading }) => {
       </div>
     </div>
   );
+};
+
+AddItem.propTypes = {
+  onAddItem: callbackProp.isRequired,
+  loading: PropTypes.bool
+};
+
+AddItem.defaultProps = {
+  loading: false
 };
 
 export default AddItem;

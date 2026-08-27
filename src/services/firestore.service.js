@@ -6,7 +6,6 @@ import {
   where, 
   updateDoc, 
   doc, 
-  getDoc, 
   deleteDoc,
   writeBatch,
   onSnapshot,
@@ -23,14 +22,16 @@ const RECIPES_COLLECTION = 'recipes';
 /**
  * Add a new item or update existing item quantity
  * @param {string} userId - User's unique ID
+ * @param {string} email - User's email address
  * @param {string} itemName - Name of the item
  * @param {number} quantity - Item quantity
  * @returns {Promise<Object>} Success response with item data
  * @throws {Error} Formatted Firestore error
  */
-export const addItem = async (userId, itemName, quantity) => {
+export const addItem = async (userId, email, itemName, quantity) => {
   try {
     if (!userId) throw new Error('User ID is required');
+    if (!email?.trim()) throw new Error('User email is required');
     if (!itemName?.trim()) throw new Error('Item name is required');
     if (quantity <= 0) throw new Error('Quantity must be positive');
 
@@ -61,6 +62,7 @@ export const addItem = async (userId, itemName, quantity) => {
         itemName: itemName.trim(), 
         quantity: Number(quantity), 
         userId,
+        email: email.trim(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -333,6 +335,28 @@ export const getCachedRecipe = async (userId, ingredients) => {
     }
 
     return null;
+  } catch (error) {
+    throw new Error(formatFirestoreError(error));
+  }
+};
+
+/**
+ * Delete a saved recipe
+ * @param {string} recipeId - Recipe document ID
+ * @returns {Promise<Object>} Success response
+ * @throws {Error} Formatted Firestore error
+ */
+export const deleteRecipe = async (recipeId) => {
+  try {
+    if (!recipeId) throw new Error('Recipe ID is required');
+
+    const recipeRef = doc(db, RECIPES_COLLECTION, recipeId);
+    await deleteDoc(recipeRef);
+
+    return {
+      success: true,
+      message: 'Recipe deleted successfully'
+    };
   } catch (error) {
     throw new Error(formatFirestoreError(error));
   }

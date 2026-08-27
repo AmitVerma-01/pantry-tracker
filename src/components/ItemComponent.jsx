@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useToast } from "./common/Toast";
 import { validateItemName, validateQuantity } from "../utils/validation";
@@ -16,7 +16,21 @@ const ItemComponent = ({
   const [editedName, setEditedName] = useState(itemName);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [localQuantity, setLocalQuantity] = useState(quantity);
   const toast = useToast();
+  const quantityTimerRef = useRef(null);
+
+  useEffect(() => {
+    setLocalQuantity(quantity);
+  }, [quantity]);
+
+  useEffect(() => {
+    return () => {
+      if (quantityTimerRef.current) {
+        clearTimeout(quantityTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleStartEdit = () => {
     setIsEditing(true);
@@ -33,7 +47,7 @@ const ItemComponent = ({
   const handleSaveEdit = async () => {
     const trimmedName = editedName.trim();
     const validationError = validateItemName(trimmedName);
-    
+
     if (validationError) {
       setError(validationError);
       return;
@@ -58,12 +72,13 @@ const ItemComponent = ({
     }
   };
 
-  const handleQuantityChange = async (newQuantity) => {
+  const commitQuantityChange = useCallback(async (newQuantity) => {
     const quantityNum = parseInt(newQuantity, 10);
     const validationError = validateQuantity(quantityNum);
-    
+
     if (validationError) {
       toast.error(validationError);
+      setLocalQuantity(quantity);
       return;
     }
 
@@ -76,41 +91,43 @@ const ItemComponent = ({
       await onUpdate(docId, { quantity: quantityNum });
     } catch (err) {
       toast.error(err.message || "Failed to update quantity");
+      setLocalQuantity(quantity);
     } finally {
       setLoading(false);
     }
-  };
+  }, [docId, onUpdate, quantity, toast]);
 
   const handleIncreaseQuantity = () => {
-    handleQuantityChange(quantity + 1);
+    commitQuantityChange(quantity + 1);
   };
 
   const handleDecreaseQuantity = () => {
     if (quantity > 1) {
-      handleQuantityChange(quantity - 1);
+      commitQuantityChange(quantity - 1);
     }
   };
 
   const handleQuantityInputChange = (e) => {
     const value = e.target.value;
-    if (value === "" || parseInt(value, 10) >= 1) {
-      handleQuantityChange(value || 1);
+    setLocalQuantity(value);
+
+    if (quantityTimerRef.current) {
+      clearTimeout(quantityTimerRef.current);
     }
+
+    quantityTimerRef.current = setTimeout(() => {
+      if (value === "" || parseInt(value, 10) >= 1) {
+        commitQuantityChange(value || 1);
+      }
+    }, 500);
   };
 
-  const handleDelete = async () => {
-    setLoading(true);
-    try {
-      await onDelete(docId);
-      toast.success(`${itemName} deleted successfully`);
-    } catch (err) {
-      toast.error(err.message || "Failed to delete item");
-      setLoading(false);
-    }
+  const handleDelete = () => {
+    onDelete(docId, itemName);
   };
 
   const handleCheckboxChange = (e) => {
-    onCheckboxChange(itemName, e.target.checked);
+    onCheckboxChange(docId, e.target.checked);
   };
 
   const handleKeyPress = (e) => {
@@ -125,7 +142,6 @@ const ItemComponent = ({
     <div className={`w-full border mt-1 flex items-center justify-between border-c2 rounded-lg min-h-12 bg-white hover:bg-c1 transition-smooth hover:shadow-md ${
       loading ? 'opacity-50' : ''
     }`}>
-      {/* Item Name Section */}
       <div className="flex items-center pl-3 w-3/5 py-2">
         <input
           type="checkbox"
@@ -156,11 +172,7 @@ const ItemComponent = ({
               aria-label="Save"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
             </button>
             <button
@@ -170,11 +182,7 @@ const ItemComponent = ({
               aria-label="Cancel"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
             </button>
           </div>
@@ -184,7 +192,7 @@ const ItemComponent = ({
             <button
               onClick={handleStartEdit}
               disabled={loading}
-              className="opacity-0 group-hover:opacity-100 text-c4 hover:text-c3 hover:bg-c2 p-1.5 rounded-lg transition-all disabled:opacity-50 active:scale-95"
+              className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-c4 hover:text-c3 hover:bg-c2 p-1.5 rounded-lg transition-all disabled:opacity-50 active:scale-95"
               aria-label="Edit item name"
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -195,7 +203,6 @@ const ItemComponent = ({
         )}
       </div>
 
-      {/* Quantity Section */}
       <div className="w-1/5 flex justify-center items-center gap-1">
         <button
           className="w-8 h-8 flex items-center justify-center rounded-lg bg-c2 hover:bg-c3 text-gray-800 font-bold transition-smooth disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 hover:shadow-md"
@@ -209,7 +216,7 @@ const ItemComponent = ({
           type="number"
           onChange={handleQuantityInputChange}
           className="w-12 h-8 rounded-lg text-center bg-white border-2 border-c3 shadow-sm disabled:opacity-50 font-semibold text-gray-800 focus:border-c4 transition-smooth"
-          value={quantity}
+          value={localQuantity}
           min="1"
           disabled={loading}
           aria-label="Quantity"
@@ -224,7 +231,6 @@ const ItemComponent = ({
         </button>
       </div>
 
-      {/* Delete Section */}
       <div className="w-1/5 flex justify-center items-center">
         <button
           onClick={handleDelete}
@@ -232,26 +238,7 @@ const ItemComponent = ({
           className="p-2 hover:bg-red-50 rounded-lg transition-smooth disabled:opacity-50 active:scale-95 group"
           aria-label="Delete item"
         >
-          {loading ? (
-            <svg className="animate-spin h-5 w-5 text-gray-600" viewBox="0 0 24 24">
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-          ) : (
-            <img src="delete.png" alt="delete" className="w-6 h-6 group-hover:scale-110 transition-transform" />
-          )}
+          <img src="delete.png" alt="" className="w-6 h-6 group-hover:scale-110 transition-transform" />
         </button>
       </div>
 
@@ -278,5 +265,4 @@ ItemComponent.defaultProps = {
   checked: false
 };
 
-export default ItemComponent;
-  
+export default memo(ItemComponent);

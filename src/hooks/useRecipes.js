@@ -140,8 +140,7 @@ export const useRecipes = (userId) => {
 
     setError(null);
     try {
-      // Use the deleteItem method from firestore service (works for any document)
-      await firestoreService.deleteItem(recipeId);
+      await firestoreService.deleteRecipe(recipeId);
       
       // Update local state
       setRecipes(prev => prev.filter(recipe => recipe.id !== recipeId));

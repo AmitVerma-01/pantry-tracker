@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const Input = ({type, label, id, placeholder, onChange, value, disabled, onBlur}) => {
   return (
     <div className="flex flex-col gap-y-1">
@@ -16,5 +18,16 @@ const Input = ({type, label, id, placeholder, onChange, value, disabled, onBlur}
     </div>
   )
 }
+
+Input.propTypes = {
+  type: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
+  onBlur: PropTypes.func
+};
 
 export default Input

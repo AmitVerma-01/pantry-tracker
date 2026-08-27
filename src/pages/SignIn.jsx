@@ -4,6 +4,7 @@ import PasswordInput from "../components/PasswordInput";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../components/common/Toast";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import GoogleButton from "../components/GoogleButton";
 import { NavLink, useNavigate } from "react-router-dom";
 import { validateEmail, validatePassword } from "../utils/validation";
 import { formatAuthError } from "../utils/errorHandler";
@@ -143,8 +144,16 @@ const SignIn = () => {
           </button>
         </form>
 
+        <div className="my-4 flex items-center gap-3">
+          <div className="flex-1 h-px bg-c3" />
+          <span className="text-gray-500 text-sm">or</span>
+          <div className="flex-1 h-px bg-c3" />
+        </div>
+
+        <GoogleButton label="Sign in with Google" />
+
         <p className="text-gray-600 text-center my-4 md:my-6 text-sm md:text-base">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <NavLink to="/signup" className="text-c4 font-semibold hover:underline transition-all">
             Sign Up
           </NavLink>

@@ -1,5 +1,5 @@
 import { useState } from "react"
-
+import PropTypes from "prop-types"
 
 function PasswordInput({onChange, value, disabled, onBlur}) {
     const [togglePassword , setTogglePassword] = useState(false)
@@ -37,5 +37,12 @@ function PasswordInput({onChange, value, disabled, onBlur}) {
     </div>
   )
 }
+
+PasswordInput.propTypes = {
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string.isRequired,
+  disabled: PropTypes.bool,
+  onBlur: PropTypes.func
+};
 
 export default PasswordInput

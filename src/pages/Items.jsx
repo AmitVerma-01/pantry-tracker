@@ -1,18 +1,34 @@
 import { useNavigate } from "react-router-dom"
 import Item from "../components/Item"
-import { useFirebase } from "../context/firebase"
-import { useEffect} from "react"
+import { useAuth } from "../hooks/useAuth"
+import { useEffect } from "react"
+import LoadingSpinner from "../components/common/LoadingSpinner"
 
 function Items() {
-  const firebase = useFirebase()
+  const { isLoggedIn, loading } = useAuth()
   const navigate = useNavigate()
-  useEffect(()=>{
-    if(!firebase.isLoggedIn) 
-        navigate('/signup')
-  },[navigate,firebase])
+
+  useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      navigate('/signin')
+    }
+  }, [navigate, isLoggedIn, loading])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gradient-to-br from-c1 to-c2">
+        <LoadingSpinner variant="inline" size="lg" text="Loading..." />
+      </div>
+    )
+  }
+
+  if (!isLoggedIn) {
+    return null
+  }
+
   return (
     <div>
-      <Item/>
+      <Item />
     </div>
   )
 }
